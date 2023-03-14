@@ -1,0 +1,52 @@
+version: '3.9'
+services:
+  app:
+    build:
+      args:        
+        USER: ${USER:-0}
+        USER_ID: ${USER_ID:-0}
+        GROUP_ID: ${GROUP_ID:-0}
+      context: .
+      dockerfile: Dockerfile
+      
+    container_name: avs-app
+    image: avs
+    volumes:
+      - ../:/var/www/
+    networks:
+      - avs_network  
+  db:
+    image: postgres:latest
+    container_name: avs-postgres
+    volumes:
+      - ${HOME}/docker_data/postgres_data:/var/lib/postgresql
+      #- D:\\docker_data\\mysql\\avs:/var/lib/mysql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: laravel9
+    ports:
+      - 5432:5432
+    networks:
+      - avs_network
+  redis:
+    image: redis:7.0-alpine
+    container_name: avs-redis
+    ports:
+      - 63791:6379
+    networks:
+      - avs_network
+  nginx:
+    image: nginx:alpine
+    container_name: avs-nginx
+    ports:
+      - 80:80      
+    volumes:
+      - ../:/var/www/
+      - ./avs.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - avs_network
+
+networks:
+  avs_network:
+    driver: bridge
