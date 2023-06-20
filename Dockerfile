@@ -38,12 +38,17 @@ RUN apt-get -y install nodejs
 RUN npm install -g yarn
 
 # Install PHP extensions
+RUN pecl install mongodb
+RUN echo "extension=mongodb.so" >> /usr/local/etc/php/conf.d/mongodb.ini
+
 RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
+
+COPY uploads.ini $PHP_INI_DIR/conf.d/uploads.ini
 
 # Create system user to run Composer and Artisan Commands
 RUN useradd -G www-data,root -u $USER_ID -d /home/$USER $USER

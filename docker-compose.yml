@@ -29,6 +29,34 @@ services:
       - 5432:5432
     networks:
       - avs_network
+  mongodb:
+    image: mongo:6.0
+    container_name: avs-mongo
+    #environment:
+    #  MONGO_INITDB_DATABASE: tkdn
+    #  MONGO_INITDB_ROOT_USERNAME: mongouser
+    #  MONGO_INITDB_ROOT_PASSWORD: password
+      #mongosh -u mongouser -p password --authenticationDatabase admin
+    volumes:
+      - /home/arozie/docker_data/mongo_data:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - avs_network
+  minio:
+    image: minio/minio
+    container_name: avs-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - /home/arozie/docker_data/minio:/data
+    environment:
+      MINIO_ROOT_USER: tkdn
+      MINIO_ROOT_PASSWORD: tkdnminio
+    command: server --console-address ":9001" /data
+    networks:
+      - avs_network
   redis:
     image: redis:7.0-alpine
     container_name: avs-redis
