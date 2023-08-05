@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.1.21-fpm-bookworm
 
 # Arguments defined in docker-compose.yml
 ARG USER_ID=1000
@@ -21,7 +21,13 @@ RUN apt-get update && apt-get install -y \
     libnss3 libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev\
     libgconf-2-4 libatk1.0-0 libatk-bridge2.0-0 libgdk-pixbuf2.0-0 libgtk-3-0 libgbm-dev libnss3-dev libxss-dev \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-khmeros fonts-kacst fonts-freefont-ttf libxss1 libasound2 \
-    wget gnupg libpq-dev
+    wget gnupg libpq-dev postgresql-client
+
+#RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/aptdists/bullseye-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+#RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+#RUN apt -y update
+#RUN apt-get install postgresql-client-15
+
 
 #RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
 #    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
@@ -33,7 +39,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install the latest npm
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
-RUN apt-get -y install nodejs
+RUN apt-get -y install nodejs npm
 
 RUN npm install -g yarn
 
@@ -41,9 +47,12 @@ RUN npm install -g yarn
 RUN pecl install mongodb
 RUN echo "extension=mongodb.so" >> /usr/local/etc/php/conf.d/mongodb.ini
 
+RUN pecl install redis
+
 RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
+    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
+    && docker-php-ext-enable redis
 
 # Get latest Composer
 COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
