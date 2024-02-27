@@ -14,7 +14,30 @@ services:
     volumes:
       - ../:/var/www/
     networks:
-      - avs_network  
+      - avs_network
+
+  supervisor:
+    build:
+        context: .
+        dockerfile: supervisor.dockerfile
+    container_name: avs-supervisor
+    volumes:
+      - ../:/var/www/
+    networks:
+      - avs_network
+  # appold:
+  #   build:
+  #    args:
+  #      USER: ${USER:-0}
+  #      USER_ID: ${USER_ID:-0}
+  #      GROUP_ID: ${GROUP_ID:-0}
+  #    context: .
+  #    dockerfile: Dockerfile
+  #   container_name: avs-app2
+  #   volumes:
+  #     - ./old:/var/www/
+  #   networks:
+  #     - avs_network
   db:
     image: postgres:latest
     container_name: avs-postgres
